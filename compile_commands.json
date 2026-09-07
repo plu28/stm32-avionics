@@ -1,0 +1,19 @@
+[
+	{
+		"directory": "/Users/david/Code/STM32/CubeIDE/stm32-avionics",
+		"file": "src/main.c",
+		"arguments": [
+			"arm-none-eabi-gcc",
+			"-mcpu=cortex-m4",
+			"-mthumb",
+			"-DSTM32F446xx",
+			"-ICMSIS/Core/Include",
+			"-ICMSIS/Device/Include",
+			"-Wall",
+			"-O0",
+			"-g",
+			"-c",
+			"src/main.c"
+		]
+	}
+]
