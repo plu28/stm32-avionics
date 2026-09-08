@@ -23,7 +23,8 @@ BUILD = build
 
 OBJS = $(BUILD)/main.o \
        $(BUILD)/system_stm32f4xx.o \
-       $(BUILD)/startup_stm32f446xx.o
+       $(BUILD)/startup_stm32f446xx.o \
+       $(BUILD)/uart.o
 
 all: $(BUILD)/firmware.bin
 
@@ -31,6 +32,9 @@ $(BUILD):
 	mkdir -p $(BUILD)
 
 $(BUILD)/main.o: src/main.c | $(BUILD)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/uart.o: drivers/uart.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD)/system_stm32f4xx.o: system/system_stm32f4xx.c | $(BUILD)
