@@ -2,6 +2,7 @@
 #include "../drivers/imu.h"
 #include "stm32f446xx.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 volatile int milliseconds;
 
@@ -35,20 +36,26 @@ static void system_init(void) {
 
 int main(void) {
   system_init(); // Configures the clock to tick every 1ms
-  int16_t x_accel; 
+  float x_accel, y_accel, z_accel; 
 
   while (true) {
     // GPIOA->ODR ^= (1u << 5);
 
-    GPIOA->BSRR |= (1u << 5); // set pin 5
     x_accel = get_x_accel();
-    uart_printnum(x_accel);
-    delay(1000);
+    y_accel = get_y_accel();
+    z_accel = get_z_accel();
+    uart_printf("\x1b[2Kx: %.3fg\r\n", x_accel);
+    uart_printf("\x1b[2Ky: %.3fg\r\n", y_accel);
+    uart_printf("\x1b[2Kz: %.3fg\r", z_accel);
 
-    GPIOA->BSRR |= (1u << (16 + 5));
-    x_accel = get_x_accel();
-    uart_printnum(x_accel);
-    delay(1000);
+    uart_printf("\x1b[2A"); // Move up 2 lines
+
+    delay(50);
+    // Blink LED code
+    // GPIOA->BSRR |= (1u << 5); // set pin 5
+    // delay(80);
+    // GPIOA->BSRR |= (1u << (16 + 5));
+    // delay(80);
 
   }
 }

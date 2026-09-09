@@ -1,8 +1,11 @@
 #include "stm32f446xx.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdarg.h>
+#define MAX_UART_BUF 1000 // look bud if you're printing more than 1000 chasr just dont
 
 static int uart_enabled_f = 0;
+
 
 void uart_init() {
 
@@ -45,9 +48,9 @@ void uart_printstr(char* s) {
     uart_print_byte(*curr);
     curr++;
   }
-  uart_print_byte('\0');
-  uart_print_byte('\n');
-  uart_print_byte('\r');
+  // uart_print_byte('\0');
+  // uart_print_byte('\n');
+  // uart_print_byte('\r');
 
 }
 
@@ -67,6 +70,12 @@ void uart_printnum(int16_t n) {
 }
 
 void uart_printf(char *format, ...) {
+  char buf[MAX_UART_BUF];
 
+  va_list args;
+  va_start(args, format);
+  vsnprintf(buf, MAX_UART_BUF, format, args); 
+  va_end(args);
 
+  uart_printstr(buf);
 }
