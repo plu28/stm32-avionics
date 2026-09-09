@@ -36,7 +36,7 @@ static void system_init(void) {
 
 int main(void) {
   system_init(); // Configures the clock to tick every 1ms
-  float x_accel, y_accel, z_accel; 
+  float x_accel, y_accel, z_accel, roll, pitch, yaw; 
 
   while (true) {
     // GPIOA->ODR ^= (1u << 5);
@@ -44,18 +44,25 @@ int main(void) {
     x_accel = get_x_accel();
     y_accel = get_y_accel();
     z_accel = get_z_accel();
-    uart_printf("\x1b[2Kx: %.3fg\r\n", x_accel);
-    uart_printf("\x1b[2Ky: %.3fg\r\n", y_accel);
-    uart_printf("\x1b[2Kz: %.3fg\r", z_accel);
+    roll = get_x_accel();
+    pitch = get_y_accel();
+    yaw = get_z_accel();
 
-    uart_printf("\x1b[2A"); // Move up 2 lines
+    uart_printf("\x1b[2Kx: %.2f g\r\n", x_accel);
+    uart_printf("\x1b[2Ky: %.2f g\r\n", y_accel);
+    uart_printf("\x1b[2Kz: %.2f g\r\n", z_accel);
+    uart_printf("\x1b[2Kroll: %.2f deg/s\r\n", roll);
+    uart_printf("\x1b[2Kpitch: %.2f deg/s\r\n", pitch);
+    uart_printf("\x1b[2Kyaw: %.2f deg/s\r", yaw);
 
-    delay(50);
+    uart_printf("\x1b[5A"); // Move up 5 lines
+
+    // delay(50);
     // Blink LED code
-    // GPIOA->BSRR |= (1u << 5); // set pin 5
-    // delay(80);
-    // GPIOA->BSRR |= (1u << (16 + 5));
-    // delay(80);
+    GPIOA->BSRR |= (1u << 5); // set pin 5
+    delay(100);
+    GPIOA->BSRR |= (1u << (16 + 5));
+    delay(100);
 
   }
 }
