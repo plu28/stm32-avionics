@@ -1,5 +1,6 @@
 #include "stm32f446xx.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 static int uart_enabled_f = 0;
 
@@ -38,7 +39,7 @@ void uart_print_byte(char c) {
 // Prints a string to the uart terminal
 // String must be null terminated
 // Prints a new line at the end
-void uart_print(char* s) {
+void uart_printstr(char* s) {
   char* curr = s;
   while (*curr != '\0') {
     uart_print_byte(*curr);
@@ -48,6 +49,21 @@ void uart_print(char* s) {
   uart_print_byte('\n');
   uart_print_byte('\r');
 
+}
+
+void uart_printnum(int16_t n) {
+  char buf[100];
+  snprintf(buf, sizeof(buf), "%hd", n);
+  uart_printstr(buf);
+
+  // char* curr = s;
+  // while (*curr != '\0') {
+  //   uart_print_byte(*curr);
+  //   curr++;
+  // }
+  // uart_print_byte('\0');
+  // uart_print_byte('\n');
+  // uart_print_byte('\r');
 }
 
 void uart_printf(char *format, ...) {
