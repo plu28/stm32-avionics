@@ -28,7 +28,9 @@
 #define GYRO_RANGE_1000 32.8 // Range of +- 1000 deg/s
 #define GYRO_RANGE_2000 16.4 // Range of +- 2000 deg/s
 
-void imu_init(void) { i2c_init(); }
+void imu_init(void) { i2c_init(); 
+	// Configure IMU
+}
 
 float get_x_accel() {
   uint8_t lower_8_bytes = i2c_read_byte(IMU_ADDR, X_ACCEL_LOW_ADDR);

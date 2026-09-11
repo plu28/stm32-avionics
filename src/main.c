@@ -44,9 +44,9 @@ int main(void) {
     x_accel = get_x_accel();
     y_accel = get_y_accel();
     z_accel = get_z_accel();
-    roll = get_x_accel();
-    pitch = get_y_accel();
-    yaw = get_z_accel();
+    roll = get_roll();
+    pitch = get_pitch();
+    yaw = get_yaw();
 
     uart_printf("\x1b[2Kx: %.2f g\r\n", x_accel);
     uart_printf("\x1b[2Ky: %.2f g\r\n", y_accel);

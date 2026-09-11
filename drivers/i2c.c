@@ -78,6 +78,11 @@ void enable_peripheral(uint8_t addr, char rw) {
 	clear_sr(); // Clear after reading
 }
 
+void i2c_write_byte(uint8_t i2c_addr, uint8_t reg_addr) {
+	// TODO
+
+}
+
 uint8_t i2c_read_byte(uint8_t i2c_addr, uint8_t reg_addr) {
   // Generate a start
   I2C1->CR1 |= I2C_CR1_START;
