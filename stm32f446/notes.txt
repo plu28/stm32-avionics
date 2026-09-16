@@ -1,0 +1,10 @@
+changes so far:
+- changed gyro to define hex instead of decimal in imu.c
+- changed unsigned 16 bit number to float point in imu.h
+- changed mpu functions to read high byte before low byte
+- added gyro calibration
+- programmed the entire controller transmit sequence because for some reason calibration needs it
+- used controller transmit to wake up imu in imu.c
+- changed pull-up config in i2c.c to be actually pull-up not reserved
+- stopped enable_peripheral() from clearing SR since it was interfering with write sequence, re-added clear manually to reading function:w
+- removed NACK at the end of i2c_read_byte because it wasnt needed and broke everything
