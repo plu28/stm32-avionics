@@ -1,19 +1,126 @@
 [
-	{
-		"directory": "/Users/david/Code/STM32/CubeIDE/stm32-avionics",
-		"file": "src/main.c",
-		"arguments": [
-			"arm-none-eabi-gcc",
-			"-mcpu=cortex-m4",
-			"-mthumb",
-			"-DSTM32F446xx",
-			"-ICMSIS/Core/Include",
-			"-ICMSIS/Device/Include",
-			"-Wall",
-			"-O0",
-			"-g",
-			"-c",
-			"src/main.c"
-		]
-	}
+  {
+    "file": "src/main.c",
+    "arguments": [
+      "/usr/bin/arm-none-eabi-gcc",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-DSTM32F446xx",
+      "-ICMSIS/Core/Include",
+      "-ICMSIS/Device/Include",
+      "-Wall",
+      "-O0",
+      "-g3",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-c",
+      "src/main.c",
+      "-o",
+      "build/main.o"
+    ],
+    "directory": "/home/denys/Projects/stm32-avionics/stm32f446",
+    "output": "build/main.o"
+  },
+  {
+    "file": "system/system_stm32f4xx.c",
+    "arguments": [
+      "/usr/bin/arm-none-eabi-gcc",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-DSTM32F446xx",
+      "-ICMSIS/Core/Include",
+      "-ICMSIS/Device/Include",
+      "-Wall",
+      "-O0",
+      "-g3",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-c",
+      "system/system_stm32f4xx.c",
+      "-o",
+      "build/system_stm32f4xx.o"
+    ],
+    "directory": "/home/denys/Projects/stm32-avionics/stm32f446",
+    "output": "build/system_stm32f4xx.o"
+  },
+  {
+    "file": "startup/startup_stm32f446xx.s",
+    "arguments": [
+      "/usr/bin/arm-none-eabi-gcc",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-c",
+      "startup/startup_stm32f446xx.s",
+      "-o",
+      "build/startup_stm32f446xx.o"
+    ],
+    "directory": "/home/denys/Projects/stm32-avionics/stm32f446",
+    "output": "build/startup_stm32f446xx.o"
+  },
+  {
+    "file": "drivers/uart.c",
+    "arguments": [
+      "/usr/bin/arm-none-eabi-gcc",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-DSTM32F446xx",
+      "-ICMSIS/Core/Include",
+      "-ICMSIS/Device/Include",
+      "-Wall",
+      "-O0",
+      "-g3",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-c",
+      "drivers/uart.c",
+      "-o",
+      "build/uart.o"
+    ],
+    "directory": "/home/denys/Projects/stm32-avionics/stm32f446",
+    "output": "build/uart.o"
+  },
+  {
+    "file": "drivers/imu.c",
+    "arguments": [
+      "/usr/bin/arm-none-eabi-gcc",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-DSTM32F446xx",
+      "-ICMSIS/Core/Include",
+      "-ICMSIS/Device/Include",
+      "-Wall",
+      "-O0",
+      "-g3",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-c",
+      "drivers/imu.c",
+      "-o",
+      "build/imu.o"
+    ],
+    "directory": "/home/denys/Projects/stm32-avionics/stm32f446",
+    "output": "build/imu.o"
+  },
+  {
+    "file": "drivers/i2c.c",
+    "arguments": [
+      "/usr/bin/arm-none-eabi-gcc",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-DSTM32F446xx",
+      "-ICMSIS/Core/Include",
+      "-ICMSIS/Device/Include",
+      "-Wall",
+      "-O0",
+      "-g3",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-c",
+      "drivers/i2c.c",
+      "-o",
+      "build/i2c.o"
+    ],
+    "directory": "/home/denys/Projects/stm32-avionics/stm32f446",
+    "output": "build/i2c.o"
+  }
 ]

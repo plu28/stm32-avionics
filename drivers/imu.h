@@ -2,14 +2,15 @@
 #define IMU_H
 #include <stdint.h>
 void imu_init();
+void imu_calibrate_gyro(void);
 
 float get_x_accel();
 float get_y_accel();
 float get_z_accel();
 
-int16_t get_roll();
-int16_t get_yaw();
-int16_t get_pitch();
+float get_roll();
+float get_yaw();
+float get_pitch();
 
 #endif // !IMU_H
        
