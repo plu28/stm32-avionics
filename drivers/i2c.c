@@ -12,7 +12,7 @@ void i2c_init() {
 	}
 
   RCC->APB1ENR |=
-      RCC_APB1ENR_I2C1EN; // Enable clock for the peripheral bus that I2C is on
+    RCC_APB1ENR_I2C1EN; // Enable clock for the peripheral bus that I2C is on
 	
 	// PB8 and PB9 to be pulled up
 	GPIOB->PUPDR &= ~((3u << 16u) | (3u << 18u));
@@ -112,9 +112,9 @@ void i2c_write_byte(uint8_t i2c_addr, uint8_t reg_addr, uint8_t data) {
 
 uint8_t i2c_read_byte(uint8_t i2c_addr, uint8_t reg_addr) {
 
-    // make sure previous transaction released I2C bus
-    while (I2C1->SR2 & I2C_SR2_BUSY) {
-    }
+  // make sure previous transaction released I2C bus
+  while (I2C1->SR2 & I2C_SR2_BUSY) {}
+
   // Generate a start
   I2C1->CR1 |= I2C_CR1_START;
   wait_for_sr1(I2C_SR1_SB);
@@ -136,18 +136,67 @@ uint8_t i2c_read_byte(uint8_t i2c_addr, uint8_t reg_addr) {
 
 	// Send a NACK
 	I2C1->CR1 &= ~(I2C_CR1_ACK);
-    clear_sr();
+  clear_sr();
 
-    I2C1->CR1 |= I2C_CR1_STOP; // send stop
+  I2C1->CR1 |= I2C_CR1_STOP; // send stop
 
+  // Wait for RxNE to indicate theres data in the DR
+  wait_for_sr1(I2C_SR1_RXNE);
+
+  // Read data register (clears RxNE btw)
+	uint8_t ret = (uint8_t)I2C1->DR;
+
+  while (I2C1->CR1 & I2C_CR1_STOP) {}
+
+  return ret;
+}
+
+void i2c_read(uint8_t i2c_addr, uint8_t reg_addr, int n, void* result) {
+  if (n > 100) {
+    return;
+  }
+
+  uint8_t *arr = (uint8_t*)result;
+
+  // Set ACK bit
+  I2C1->CR1 |= I2C_CR1_ACK;
+
+  // make sure previous transaction released I2C bus
+  while (I2C1->SR2 & I2C_SR2_BUSY) {}
+
+  // Generate a start
+  I2C1->CR1 |= I2C_CR1_START;
+  wait_for_sr1(I2C_SR1_SB);
+
+  enable_peripheral(i2c_addr, 'w'); 
+  clear_sr();
+
+  wait_for_sr1(I2C_SR1_TXE);
+  I2C1->DR = reg_addr; // Send out the register address
+	
+	// Wait for register address to finish transmitting 
+	wait_for_sr1(I2C_SR1_BTF); 
+
+  // Generate ANOTHER start
+  I2C1->CR1 |= I2C_CR1_START;
+  wait_for_sr1(I2C_SR1_SB);
+
+  enable_peripheral(i2c_addr, 'r'); // Enable for reading  
+
+  for (int i = 0; i < n; i++) {
     // Wait for RxNE to indicate theres data in the DR
     wait_for_sr1(I2C_SR1_RXNE);
 
     // Read data register (clears RxNE btw)
-	uint8_t ret = (uint8_t)I2C1->DR;
+    arr[i] = (uint8_t)I2C1->DR;
+  }
 
-    while (I2C1->CR1 & I2C_CR1_STOP) {
-    }
+	// Send a NACK
+	I2C1->CR1 &= ~(I2C_CR1_ACK);
+  clear_sr();
 
-    return ret;
+  I2C1->CR1 |= I2C_CR1_STOP; // send stop
+
+  while (I2C1->CR1 & I2C_CR1_STOP) {}
+
 }
