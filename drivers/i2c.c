@@ -2,26 +2,26 @@
 #include "stm32f446xx.h"
 #include "uart.h"
 
-void _i2c_read_2_bytes(uint8_t i2c_addr, void* result) {}
-void _i2c_read_1_byte(uint8_t i2c_addr, void* result) {}
-void _i2c_read_n_bytes(uint8_t i2c_addr, void* result) {}
+void _i2c_read_2_bytes(uint8_t i2c_addr, void *result);
+void _i2c_read_1_byte(uint8_t i2c_addr, void *result);
+void _i2c_read_n_bytes(uint8_t i2c_addr, void *result, nbytes);
 
 // Using 7-bit controller receiver
 uint8_t i2c_enabled_flag = 0;
 uint32_t pclk1_hz = 16000000u; // peripheral clock speed
-uint32_t i2c_hz   = 100000u;   // i2c speed
+uint32_t i2c_hz = 100000u;     // i2c speed
 
 void i2c_init() {
-	if (i2c_enabled_flag) {
-		return;
-	}
+  if (i2c_enabled_flag) {
+    return;
+  }
 
   RCC->APB1ENR |=
-    RCC_APB1ENR_I2C1EN; // Enable clock for the peripheral bus that I2C is on
+      RCC_APB1ENR_I2C1EN; // Enable clock for the peripheral bus that I2C is on
 
-	// PB8 and PB9 to be pulled up
-	GPIOB->PUPDR &= ~((3u << 16u) | (3u << 18u));
-	GPIOB->PUPDR |= ((1u << 16u) | (1u << 18u));
+  // PB8 and PB9 to be pulled up
+  GPIOB->PUPDR &= ~((3u << 16u) | (3u << 18u));
+  GPIOB->PUPDR |= ((1u << 16u) | (1u << 18u));
 
   // PB8 = I2C1_SCL
   // PB9 = I2C1_SDA
@@ -44,7 +44,8 @@ void i2c_init() {
   I2C1->CR2 &= ~I2C_CR2_FREQ; // FREQ = 16
   I2C1->CR2 |= 16u;
 
-  I2C1->CR1 &= ~(I2C_CR1_PE); // disable PE before configuring clock configure register
+  I2C1->CR1 &=
+      ~(I2C_CR1_PE); // disable PE before configuring clock configure register
 
   I2C1->CCR = pclk1_hz / (2u * i2c_hz); // configure CCR (80 cycles)
 
@@ -52,12 +53,13 @@ void i2c_init() {
 
   I2C1->CR1 |= I2C_CR1_PE; // re-enable PE after configuring CCR
 
-	i2c_enabled_flag++;
+  i2c_enabled_flag++;
 }
 
 // Wait for a bit to be set in status register
 void wait_for_sr1(uint32_t mask) {
-  while (!(I2C1->SR1 & mask)) {}
+  while (!(I2C1->SR1 & mask)) {
+  }
 }
 
 void clear_sr() {
@@ -75,7 +77,7 @@ void enable_peripheral(uint8_t addr, char rw) {
     I2C1->DR = ((addr << 1) & ~(1u)); // write
   } else {
     uart_printstr("I2C: Invalid read/write character");
-		return;
+    return;
   }
 
   wait_for_sr1(I2C_SR1_ADDR); // Wait for address reception
@@ -83,43 +85,44 @@ void enable_peripheral(uint8_t addr, char rw) {
 
 void i2c_write_byte(uint8_t i2c_addr, uint8_t reg_addr, uint8_t data) {
 
-    // make sure previous transaction released I2C bus
-    while (I2C1->SR2 & I2C_SR2_BUSY) {
-    }
+  // make sure previous transaction released I2C bus
+  while (I2C1->SR2 & I2C_SR2_BUSY) {
+  }
 
-    I2C1->CR1 |= I2C_CR1_START; // Generate a start
-    // wait for start bit to be set and read SR1
-    while (!(I2C1->SR1 & I2C_SR1_SB)) {
-    }
+  I2C1->CR1 |= I2C_CR1_START; // Generate a start
+  // wait for start bit to be set and read SR1
+  while (!(I2C1->SR1 & I2C_SR1_SB)) {
+  }
 
-    // send mpu address + write bit
-    I2C1->DR = i2c_addr << 1u;
+  // send mpu address + write bit
+  I2C1->DR = i2c_addr << 1u;
 
-    wait_for_sr1(I2C_SR1_ADDR); // wait for address reception
-    clear_sr(); // clear address
+  wait_for_sr1(I2C_SR1_ADDR); // wait for address reception
+  clear_sr();                 // clear address
 
-    // wait for TXE bit to be set
-    while (!(I2C1->SR1 & I2C_SR1_TXE)) {
-    }
-    I2C1->DR = reg_addr; // send MPU register address
+  // wait for TXE bit to be set
+  while (!(I2C1->SR1 & I2C_SR1_TXE)) {
+  }
+  I2C1->DR = reg_addr; // send MPU register address
 
-    // wait for TXE bit to be set again
-    while (!(I2C1->SR1 & I2C_SR1_TXE)) {
-    }
+  // wait for TXE bit to be set again
+  while (!(I2C1->SR1 & I2C_SR1_TXE)) {
+  }
 
-    I2C1->DR = data; // send value to be set in register address
+  I2C1->DR = data; // send value to be set in register address
 
-    // wait for BTF to be set
-    while(!(I2C1->SR1 & I2C_SR1_BTF)) {
-    }
+  // wait for BTF to be set
+  while (!(I2C1->SR1 & I2C_SR1_BTF)) {
+  }
 
-    I2C1->CR1 |= I2C_CR1_STOP; // stop request, clears TxE and BTF
+  I2C1->CR1 |= I2C_CR1_STOP; // stop request, clears TxE and BTF
 }
 
 uint8_t i2c_read_reg_byte(uint8_t i2c_addr, uint8_t reg_addr) {
 
   // make sure previous transaction released I2C bus
-  while (I2C1->SR2 & I2C_SR2_BUSY) {}
+  while (I2C1->SR2 & I2C_SR2_BUSY) {
+  }
 
   // Generate a start
   I2C1->CR1 |= I2C_CR1_START;
@@ -131,8 +134,8 @@ uint8_t i2c_read_reg_byte(uint8_t i2c_addr, uint8_t reg_addr) {
   wait_for_sr1(I2C_SR1_TXE);
   I2C1->DR = reg_addr; // Send out the register address
 
-	// Wait for register address to finish transmitting
-	wait_for_sr1(I2C_SR1_BTF);
+  // Wait for register address to finish transmitting
+  wait_for_sr1(I2C_SR1_BTF);
 
   // Generate ANOTHER start
   I2C1->CR1 |= I2C_CR1_START;
@@ -140,8 +143,8 @@ uint8_t i2c_read_reg_byte(uint8_t i2c_addr, uint8_t reg_addr) {
 
   enable_peripheral(i2c_addr, 'r'); // Enable for reading
 
-	// Send a NACK
-	I2C1->CR1 &= ~(I2C_CR1_ACK);
+  // Send a NACK
+  I2C1->CR1 &= ~(I2C_CR1_ACK);
   clear_sr();
 
   I2C1->CR1 |= I2C_CR1_STOP; // send stop
@@ -150,9 +153,10 @@ uint8_t i2c_read_reg_byte(uint8_t i2c_addr, uint8_t reg_addr) {
   wait_for_sr1(I2C_SR1_RXNE);
 
   // Read data register (clears RxNE btw)
-	uint8_t ret = (uint8_t)I2C1->DR;
+  uint8_t ret = (uint8_t)I2C1->DR;
 
-  while (I2C1->CR1 & I2C_CR1_STOP) {}
+  while (I2C1->CR1 & I2C_CR1_STOP) {
+  }
 
   return ret;
 }
@@ -164,10 +168,11 @@ uint8_t i2c_read_reg_byte(uint8_t i2c_addr, uint8_t reg_addr) {
  * @param void* result - Buffer to store packet data in
  * @param int nbytes - Buffer size in bytes
  * */
-void i2c_read(uint8_t i2c_addr, void* result, uint32_t nbytes) {
+void i2c_read(uint8_t i2c_addr, void *result, uint32_t nbytes) {
 
-  while (I2C1->SR2 & I2C_SR2_BUSY) {} // Make sure previous transaction released I2C bus
-  uint8_t *arr = (uint8_t*)result;
+  while (I2C1->SR2 & I2C_SR2_BUSY) {
+  } // Make sure previous transaction released I2C bus
+  uint8_t *arr = (uint8_t *)result;
 
   // Generate a start
   I2C1->CR1 |= I2C_CR1_START;
@@ -176,15 +181,15 @@ void i2c_read(uint8_t i2c_addr, void* result, uint32_t nbytes) {
   enable_peripheral(i2c_addr, 'r');
   clear_sr();
 
-  if(nbytes == 1) {
+  if (nbytes == 1) {
     _i2c_read_1_byte(i2c_addr, result);
     return;
-  } else if(nbytes == 2) {
+  } else if (nbytes == 2) {
     _i2c_read_2_bytes(i2c_addr, result);
     return;
   } else {
-      _i2c_read_n_bytes(uint8_t i2c_addr, void *result)
-      return;
+    _i2c_read_n_bytes(i2c_addr, result, nbytes);
+    return;
   }
 
   // wait_for_sr1(I2C_SR1_TXE);
@@ -205,26 +210,24 @@ void i2c_read(uint8_t i2c_addr, void* result, uint32_t nbytes) {
     arr[i] = (uint8_t)I2C1->DR;
   }
 
-	// Send a NACK
-	I2C1->CR1 &= ~(I2C_CR1_ACK);
+  // Send a NACK
+  I2C1->CR1 &= ~(I2C_CR1_ACK);
   clear_sr();
 
   // Read the last byte
   arr[nbytes - 1] = (uint8_t)I2C1->DR;
 
-
   I2C1->CR1 |= I2C_CR1_STOP; // send stop
 
-  while (I2C1->CR1 & I2C_CR1_STOP) {}
-
+  while (I2C1->CR1 & I2C_CR1_STOP) {
+  }
 }
 
-void _i2c_read_2_bytes(uint8_t i2c_addr, void* result) {}
-void _i2c_read_1_byte(uint8_t i2c_addr, void* result) {}
-void _i2c_read_n_bytes(uint8_t i2c_addr, void* result) {}
+void _i2c_read_2_bytes(uint8_t i2c_addr, void *result) {}
+void _i2c_read_1_byte(uint8_t i2c_addr, void *result) {}
+void _i2c_read_n_bytes(uint8_t i2c_addr, void *result) {}
 
-
-void i2c_write(uint8_t i2c_addr, uint8_t* payload, uint32_t size) {
+void i2c_write(uint8_t i2c_addr, uint8_t *payload, uint32_t size) {
   // make sure previous transaction released I2C bus
   while (I2C1->SR2 & I2C_SR2_BUSY) {
   }
@@ -237,7 +240,7 @@ void i2c_write(uint8_t i2c_addr, uint8_t* payload, uint32_t size) {
   // send mpu address + write bit
   I2C1->DR = i2c_addr << 1u;
   wait_for_sr1(I2C_SR1_ADDR); // wait for address reception
-  clear_sr(); // clear address
+  clear_sr();                 // clear address
 
   // wait for TXE bit to be set
   while (!(I2C1->SR1 & I2C_SR1_TXE)) {
@@ -246,7 +249,7 @@ void i2c_write(uint8_t i2c_addr, uint8_t* payload, uint32_t size) {
   for (int i = 0; i < size; i++) {
     I2C1->DR = payload[i]; // send value to be set in register address
   }
-    wait_for_sr1(I2C_SR1_BTF); // wait for BTF to be set
-                               //
+  wait_for_sr1(I2C_SR1_BTF); // wait for BTF to be set
+                             //
   I2C1->CR1 |= I2C_CR1_STOP; // stop request, clears TxE and BTF
 }
