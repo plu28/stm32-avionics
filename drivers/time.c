@@ -1,5 +1,7 @@
 #include "time.h"
 
+volatile int milliseconds;
+
 void SysTick_Handler() { milliseconds++; }
 
 void delay(int ms) {

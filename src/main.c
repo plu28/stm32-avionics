@@ -1,19 +1,11 @@
 #include "../drivers/uart.h"
 #include "../drivers/imu.h"
 #include "../drivers/lidar.h"
+#include "../drivers/i2c.h"
+#include "../drivers/time.h"
 #include "stm32f446xx.h"
 #include <stdbool.h>
 #include <stdio.h>
-
-volatile int milliseconds;
-
-void SysTick_Handler() { milliseconds++; }
-
-void delay(int ms) {
-  int start = milliseconds;
-  while (milliseconds < (start + ms)) {
-  }
-}
 
 static void system_init(void) {
   // Enable the clock on the GPIOA, GPIOB, and i2c busses
@@ -23,7 +15,7 @@ static void system_init(void) {
   // PA5 is set on bits 10-11 for this register
   GPIOA->MODER &= ~(3u << 10);   // set bits 10-11 to 00
   GPIOA->MODER |= (1u << 10);    // set bits 10-11 to 01 (output)
-  GPIOA->OTYPER &= ~(1u << 5);   // set bit 5 to 0
+  GPIOA->OTYPER &= ~(1f << 5);   // set bit 5 to 0
   GPIOA->OSPEEDR &= ~(3u << 10); // set speed bits to 00
   // GPIOA->OSPEEDR |= (1u << 00); // low speed (00)
   // GPIOA->OSPEEDR |= (1u << 10);  // medium speed (01)
@@ -32,6 +24,8 @@ static void system_init(void) {
   SysTick_Config(SystemCoreClock / 1000u);
 
   uart_init();
+  i2c_init();
+  lidar_init(8);
   // imu_init();
 }
 
@@ -46,10 +40,10 @@ int main(void) {
   // GPIOA->BSRR |= (1u << (16 + 5)); // turn LED off
   // uart_printstr("Calibration complete.\r\n");
   //
-  // float x_accel, y_accel, z_accel, roll, pitch, yaw; 
+  // float x_accel, y_accel, z_accel, roll, pitch, yaw;
 
   while (true) {
-    // GPIOA->ODR ^= (1u << 5);
+    GPIOA->ODR ^= (1u << 5);
     // x_accel = get_x_accel();
     // y_accel = get_y_accel();
     // z_accel = get_z_accel();

@@ -1,7 +1,6 @@
 #ifndef TIME
 #include <stdint.h>
 
-volatile int milliseconds;
 
 // Overwrite systick handler to increment milliseconds
 void SysTick_Handler();

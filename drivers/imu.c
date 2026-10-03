@@ -40,43 +40,43 @@ void imu_init(void) {
 }
 
 float get_x_accel(void) {
-  uint8_t higher_8_bytes = i2c_read_byte(IMU_ADDR, X_ACCEL_HIGH_ADDR);
-  uint8_t lower_8_bytes = i2c_read_byte(IMU_ADDR, X_ACCEL_LOW_ADDR);
+  uint8_t higher_8_bytes = i2c_read_reg_byte(IMU_ADDR, X_ACCEL_HIGH_ADDR);
+  uint8_t lower_8_bytes = i2c_read_reg_byte(IMU_ADDR, X_ACCEL_LOW_ADDR);
   int16_t raw = ((int16_t)higher_8_bytes << 8) | lower_8_bytes;
   return (float)raw / ACCEL_RANGE_2;
 }
 
 float get_y_accel(void) {
-  uint8_t higher_8_bytes = i2c_read_byte(IMU_ADDR, Y_ACCEL_HIGH_ADDR);
-  uint8_t lower_8_bytes = i2c_read_byte(IMU_ADDR, Y_ACCEL_LOW_ADDR);
+  uint8_t higher_8_bytes = i2c_read_reg_byte(IMU_ADDR, Y_ACCEL_HIGH_ADDR);
+  uint8_t lower_8_bytes = i2c_read_reg_byte(IMU_ADDR, Y_ACCEL_LOW_ADDR);
   int16_t raw = ((int16_t)higher_8_bytes << 8) | lower_8_bytes;
   return (float)raw / ACCEL_RANGE_2;
 }
 
 float get_z_accel(void) {
-  uint8_t higher_8_bytes = i2c_read_byte(IMU_ADDR, Z_ACCEL_HIGH_ADDR);
-  uint8_t lower_8_bytes = i2c_read_byte(IMU_ADDR, Z_ACCEL_LOW_ADDR);
+  uint8_t higher_8_bytes = i2c_read_reg_byte(IMU_ADDR, Z_ACCEL_HIGH_ADDR);
+  uint8_t lower_8_bytes = i2c_read_reg_byte(IMU_ADDR, Z_ACCEL_LOW_ADDR);
   int16_t raw = ((int16_t)higher_8_bytes << 8) | lower_8_bytes;
   return (float)raw / ACCEL_RANGE_2;
 }
 
 float get_raw_roll(void) {
-  uint8_t higher_8_bytes = i2c_read_byte(IMU_ADDR, X_GYRO_HIGH_ADDR);
-  uint8_t lower_8_bytes = i2c_read_byte(IMU_ADDR, X_GYRO_LOW_ADDR);
+  uint8_t higher_8_bytes = i2c_read_reg_byte(IMU_ADDR, X_GYRO_HIGH_ADDR);
+  uint8_t lower_8_bytes = i2c_read_reg_byte(IMU_ADDR, X_GYRO_LOW_ADDR);
   int16_t raw = ((int16_t)higher_8_bytes << 8) | lower_8_bytes;
   return (float)raw / GYRO_RANGE_250;
 }
 
 float get_raw_pitch(void) {
-  uint8_t higher_8_bytes = i2c_read_byte(IMU_ADDR, Y_GYRO_HIGH_ADDR);
-  uint8_t lower_8_bytes = i2c_read_byte(IMU_ADDR, Y_GYRO_LOW_ADDR);
+  uint8_t higher_8_bytes = i2c_read_reg_byte(IMU_ADDR, Y_GYRO_HIGH_ADDR);
+  uint8_t lower_8_bytes = i2c_read_reg_byte(IMU_ADDR, Y_GYRO_LOW_ADDR);
   int16_t raw = ((int16_t)higher_8_bytes << 8) | lower_8_bytes;
   return (float)raw / GYRO_RANGE_250;
 }
 
 float get_raw_yaw(void) {
-  uint8_t higher_8_bytes = i2c_read_byte(IMU_ADDR, Z_GYRO_HIGH_ADDR);
-  uint8_t lower_8_bytes = i2c_read_byte(IMU_ADDR, Z_GYRO_LOW_ADDR);
+  uint8_t higher_8_bytes = i2c_read_reg_byte(IMU_ADDR, Z_GYRO_HIGH_ADDR);
+  uint8_t lower_8_bytes = i2c_read_reg_byte(IMU_ADDR, Z_GYRO_LOW_ADDR);
   int16_t raw = ((int16_t)higher_8_bytes << 8) | lower_8_bytes;
   return (float)raw / GYRO_RANGE_250;
 }
