@@ -1,0 +1,21 @@
+I2C Read Sequence
+
+-- Reading from a peripheral address
+START
+Device address + Read
+Receive data
+NACK final byte
+STOP
+
+-- Reading from a peripheral address + register address
+START
++ Device address + Write
++ Register address
++ Repeated START
+Device address + Read
+Receive data
+    1 byte
+    2 byte
+    n byte
+NACK final byte
+STOP

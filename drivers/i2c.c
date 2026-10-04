@@ -4,7 +4,7 @@
 
 void _i2c_read_2_bytes(uint8_t i2c_addr, void *result);
 void _i2c_read_1_byte(uint8_t i2c_addr, void *result);
-void _i2c_read_n_bytes(uint8_t i2c_addr, void *result, nbytes);
+void _i2c_read_n_bytes(uint8_t i2c_addr, void *result, uint32_t nbytes);
 
 // Using 7-bit controller receiver
 uint8_t i2c_enabled_flag = 0;
@@ -83,7 +83,7 @@ void enable_peripheral(uint8_t addr, char rw) {
   wait_for_sr1(I2C_SR1_ADDR); // Wait for address reception
 }
 
-void i2c_write_byte(uint8_t i2c_addr, uint8_t reg_addr, uint8_t data) {
+void i2c_write_reg_byte(uint8_t i2c_addr, uint8_t reg_addr, uint8_t data) {
 
   // make sure previous transaction released I2C bus
   while (I2C1->SR2 & I2C_SR2_BUSY) {
@@ -162,72 +162,100 @@ uint8_t i2c_read_reg_byte(uint8_t i2c_addr, uint8_t reg_addr) {
 }
 /*
  * Read an arbitrary amount of bytes from an i2c slave
- * This function does not read from a register
+ * If not reading from a register, set reg_addr to be negative.
  *
  * @param uint8_t i2c_addr - Address of the I2C peripheral
  * @param void* result - Buffer to store packet data in
  * @param int nbytes - Buffer size in bytes
  * */
-void i2c_read(uint8_t i2c_addr, void *result, uint32_t nbytes) {
+void i2c_read(uint8_t i2c_addr, int16_t reg_addr, void *result,
+              uint32_t nbytes) {
 
-  while (I2C1->SR2 & I2C_SR2_BUSY) {
-  } // Make sure previous transaction released I2C bus
-  uint8_t *arr = (uint8_t *)result;
+  if (i2c_addr > 0) {
+    // Tell the peripheral what register we want to read from
+
+    // Generate a start
+    I2C1->CR1 |= I2C_CR1_START;
+    wait_for_sr1(I2C_SR1_SB);
+
+    enable_peripheral(i2c_addr, 'w');
+    clear_sr();
+
+    wait_for_sr1(I2C_SR1_TXE);
+    I2C1->DR = (uint8_t)reg_addr; // Send out the register address
+
+    // Wait for register address to finish transmitting
+    wait_for_sr1(I2C_SR1_BTF);
+  }
 
   // Generate a start
   I2C1->CR1 |= I2C_CR1_START;
   wait_for_sr1(I2C_SR1_SB);
 
   enable_peripheral(i2c_addr, 'r');
-  clear_sr();
 
   if (nbytes == 1) {
     _i2c_read_1_byte(i2c_addr, result);
-    return;
   } else if (nbytes == 2) {
     _i2c_read_2_bytes(i2c_addr, result);
-    return;
   } else {
     _i2c_read_n_bytes(i2c_addr, result, nbytes);
-    return;
   }
 
   // wait_for_sr1(I2C_SR1_TXE);
+}
 
-  // Generate ANOTHER start
-  I2C1->CR1 |= I2C_CR1_START;
-  wait_for_sr1(I2C_SR1_SB);
-
-  enable_peripheral(i2c_addr, 'r'); // Enable for reading
-  clear_sr();
-
-  // Read up to the n-1th byte
-  for (int i = 0; i < nbytes - 1; i++) {
-    // Wait for RxNE to indicate theres data in the DR
-    wait_for_sr1(I2C_SR1_RXNE);
-
-    // Read data register (clears RxNE btw)
-    arr[i] = (uint8_t)I2C1->DR;
-  }
-
+void _i2c_read_1_byte(uint8_t i2c_addr, void *result) {
   // Send a NACK
   I2C1->CR1 &= ~(I2C_CR1_ACK);
+
   clear_sr();
 
-  // Read the last byte
-  arr[nbytes - 1] = (uint8_t)I2C1->DR;
-
   I2C1->CR1 |= I2C_CR1_STOP; // send stop
+
+  // Wait for RxNE to indicate theres data in the DR
+  wait_for_sr1(I2C_SR1_RXNE);
+
+  // Read data register (clears RxNE btw)
+  *(uint8_t *)result = (uint8_t)I2C1->DR;
 
   while (I2C1->CR1 & I2C_CR1_STOP) {
   }
 }
+void _i2c_read_2_bytes(uint8_t i2c_addr, void *result) {
+  // Clears ADDR bit
+  // clear_sr();
+}
+void _i2c_read_n_bytes(uint8_t i2c_addr, void *result, uint32_t nbytes) {
+  // Clears ADDR bit
+//   clear_sr();
+//
+//   wait_for_sr1(I2C_SR1_BTF);
+//
+//   // Read up to the n-1th byte
+//   for (int i = 0; i < nbytes - 1; i++) {
+//     // Wait for RxNE to indicate theres data in the DR
+//     wait_for_sr1(I2C_SR1_RXNE);
+//
+//     // Read data register (clears RxNE btw)
+//     arr[i] = (uint8_t)I2C1->DR;
+//   }
+//
+//   // Send a NACK
+//   I2C1->CR1 &= ~(I2C_CR1_ACK);
+//   clear_sr();
+//
+//   // Read the last byte
+//   arr[nbytes - 1] = (uint8_t)I2C1->DR;
+//
+//   I2C1->CR1 |= I2C_CR1_STOP; // send stop
+//
+//   while (I2C1->CR1 & I2C_CR1_STOP) {
+//   }
+}
 
-void _i2c_read_2_bytes(uint8_t i2c_addr, void *result) {}
-void _i2c_read_1_byte(uint8_t i2c_addr, void *result) {}
-void _i2c_read_n_bytes(uint8_t i2c_addr, void *result) {}
-
-void i2c_write(uint8_t i2c_addr, uint8_t *payload, uint32_t size) {
+void i2c_write(uint8_t i2c_addr, int16_t reg_addr, uint8_t *payload,
+               uint32_t size) {
   // make sure previous transaction released I2C bus
   while (I2C1->SR2 & I2C_SR2_BUSY) {
   }
