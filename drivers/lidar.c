@@ -2,11 +2,11 @@
 #include "i2c.h"
 #include "uart.h"
 #include <stdint.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #define PACKET_MAX 128
-#define LIDAR_ADDR 0x33 // Configured on the physical sensor
+#define LIDAR_ADDR 0x30 // Configured on the physical sensor
 #define INIT_PKT_SIZE 8
 
 #define CMD_SETMODE 1
@@ -14,9 +14,12 @@
 #define CMD_FIXED_POINT 3
 
 #define PKT_MAGIC_OFFSET 0
-#define PKT_LEN_OFFSET 1
+#define PKT_LENH_OFFSET 1
+#define PKT_LENL_OFFSET 2
 #define PKT_CMD_OFFSET 3
 #define PKT_PAYLOAD_OFFSET 4
+
+#define PKT_RECIEVE_HDR_LEN 4
 
 // Payload lengths
 #define FIXED_POINT_PAYLOAD_LEN 2 // for fixed point data
@@ -30,14 +33,14 @@
 //
 
 typedef struct __attribute__((packed)) {
-  uint8_t status;          // Response packet status
-  uint16_t len;            // Length of response payload
-  uint8_t cmd;             // Response command
-  uint8_t buf[PACKET_MAX]; // Response payload
+  uint8_t status; // Response packet status
+  uint16_t len;   // Length of response payload
+  uint8_t cmd;    // Response command
+  uint8_t *buf;   // Response payload
 } recvpkt_t;
 
 void _sendpkt(uint8_t cmd, uint8_t *payload, uint16_t size);
-void _recvpkt(uint8_t cmd, recvpkt_t *recvpkt); 
+void _recvpkt(uint8_t cmd, recvpkt_t *recvpkt, uint16_t size);
 void set_ranging_mode(uint8_t range);
 
 void lidar_init(uint8_t range) {
@@ -69,14 +72,13 @@ uint16_t get_lidar(uint8_t x, uint8_t y) {
   uint8_t buf[2] = {x, y};
   _sendpkt(CMD_FIXED_POINT, buf, 2);
 
-	recvpkt_t data;
-	_recvpkt(CMD_FIXED_POINT, &data);
-	// TODO: Check receive packet status and wtv
+  recvpkt_t data;
+  _recvpkt(CMD_FIXED_POINT, &data, 2);
+  // TODO: Check receive packet status and wtv
 
-	uint16_t ret;
-	memcpy(&ret, data.buf, 2);
-	return ret;
-
+  uint16_t ret;
+  memcpy(&ret, data.buf, 2);
+  return ret;
 }
 
 // Talk to the lidar with its weird custom chinese protocol
@@ -93,18 +95,21 @@ void _sendpkt(uint8_t cmd, uint8_t *payload, uint16_t size) {
   uint8_t pkt[PACKET_MAX];
   uint8_t magic_byte = 0x55;
   uint16_t length = size + 1; // +1 for the command byte
+  uint8_t length_h = (uint8_t)(length >> 8u);
+  uint8_t length_l = (uint8_t)length;
 
   memcpy(pkt + PKT_MAGIC_OFFSET, &magic_byte, sizeof(magic_byte));
-  memcpy(pkt + PKT_LEN_OFFSET, &length, sizeof(length));
+  memcpy(pkt + PKT_LENH_OFFSET, &length_h, sizeof(length_h));
+  memcpy(pkt + PKT_LENL_OFFSET, &length_l, sizeof(length_l));
   memcpy(pkt + PKT_CMD_OFFSET, &cmd, sizeof(cmd));
   memcpy(pkt + PKT_PAYLOAD_OFFSET, payload, size);
 
   uint32_t pkt_size = sizeof(magic_byte) + sizeof(length) + sizeof(cmd) + size;
 
-  i2c_write(LIDAR_ADDR, pkt, pkt_size);
+  i2c_write(LIDAR_ADDR, -1, pkt, pkt_size);
 }
 
-void _recvpkt(uint8_t cmd, recvpkt_t *recvpkt) {
+void _recvpkt(uint8_t cmd, recvpkt_t *recvpkt, uint16_t size) {
   /*
    * Wait for a response packet and fill an error code
    * */
@@ -113,16 +118,29 @@ void _recvpkt(uint8_t cmd, recvpkt_t *recvpkt) {
     return;
   }
 
-  uint32_t pkt_length = -1;
+  // uint32_t pkt_length = -1;
+  //
+  // if (ranging_mode == 4) {
+  //   pkt_length = 36; // (4 * 4) * 2 + 4
+  // } else {
+  //   pkt_length = 132; // (8 * 8) * 2 + 4
+  // }
 
-  if (ranging_mode == 4) {
-    pkt_length = 36; // (4 * 4) * 2 + 4
-  } else {
-    pkt_length = 132; // (8 * 8) * 2 + 4
-  }
-
-  i2c_read(LIDAR_ADDR, &recvpkt, pkt_length);
+  i2c_read(LIDAR_ADDR, -1, recvpkt, size + PKT_RECIEVE_HDR_LEN);
 }
+
+// void get_x8_lidar(x8_lidar_t *data) {
+//   /*
+//    * Read data for 8x8 matrix
+//    * */
+//   if (ranging_mode != 8) {
+//     uart_printf("Can't read 8x8 lidar data when ranging mode is set to
+//     %dx%d\n",
+//                 ranging_mode, ranging_mode);
+//     return;
+//   }
+//   recvpkt_t
+// }
 
 // void lidar_butthole() {
 //     // measures how much dih u can take
