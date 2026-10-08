@@ -28,7 +28,8 @@ OBJS = $(BUILD)/main.o \
        $(BUILD)/imu.o \
        $(BUILD)/i2c.o \
        $(BUILD)/time.o \
-       $(BUILD)/lidar.o 
+       $(BUILD)/lidar.o \
+       $(BUILD)/esc.o
 
 all: $(BUILD)/firmware.bin
 
@@ -48,6 +49,9 @@ $(BUILD)/i2c.o: drivers/i2c.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD)/lidar.o: drivers/lidar.c | $(BUILD)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/esc.o: drivers/esc.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD)/time.o: drivers/time.c | $(BUILD)

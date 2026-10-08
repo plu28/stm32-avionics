@@ -3,6 +3,7 @@
 #include "../drivers/lidar.h"
 #include "../drivers/i2c.h"
 #include "../drivers/time.h"
+#include "../drivers/esc.h"
 #include "stm32f446xx.h"
 #include <stdbool.h>
 #include <stdio.h>
@@ -24,9 +25,10 @@ static void system_init(void) {
   SysTick_Config(SystemCoreClock / 1000u);
 
   uart_init();
-  i2c_init();
-  lidar_init(8);
+  // i2c_init();
+  // lidar_init(8);
   // imu_init();
+  esc_init();
 }
 
 int main(void) {
@@ -41,6 +43,9 @@ int main(void) {
   // uart_printstr("Calibration complete.\r\n");
   //
   // float x_accel, y_accel, z_accel, roll, pitch, yaw;
+  esc_set_throttle(0);
+  delay(3000);
+  esc_set_throttle(10);
 
   while (true) {
     GPIOA->ODR ^= (1u << 5);
@@ -57,17 +62,17 @@ int main(void) {
     // uart_printf("\x1b[2K\rroll:  %.2f deg/s\r\n", roll);
     // uart_printf("\x1b[2K\rpitch: %.2f deg/s\r\n", pitch);
     // uart_printf("\x1b[2K\ryaw:   %.2f deg/s\r\n", yaw);
-    uart_printf("\x1b[2K\rDepth Map (mm):\r\n");
-    uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,0), get_lidar(1,0), get_lidar(2,0), get_lidar(3,0), get_lidar(4,0), get_lidar(5,0), get_lidar(6,0), get_lidar(7,0));
-    uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,1), get_lidar(1,1), get_lidar(2,1), get_lidar(3,1), get_lidar(4,1), get_lidar(5,1), get_lidar(6,1), get_lidar(7,1));
-    uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,2), get_lidar(1,2), get_lidar(2,2), get_lidar(3,2), get_lidar(4,2), get_lidar(5,2), get_lidar(6,2), get_lidar(7,2));
-    uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,3), get_lidar(1,3), get_lidar(2,3), get_lidar(3,3), get_lidar(4,3), get_lidar(5,3), get_lidar(6,3), get_lidar(7,3));
-    uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,4), get_lidar(1,4), get_lidar(2,4), get_lidar(3,4), get_lidar(4,4), get_lidar(5,4), get_lidar(6,4), get_lidar(7,4));
-    uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,5), get_lidar(1,5), get_lidar(2,5), get_lidar(3,5), get_lidar(4,5), get_lidar(5,5), get_lidar(6,5), get_lidar(7,5));
-    uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,6), get_lidar(1,6), get_lidar(2,6), get_lidar(3,6), get_lidar(4,6), get_lidar(5,6), get_lidar(6,6), get_lidar(7,6));
-    uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,7), get_lidar(1,7), get_lidar(2,7), get_lidar(3,7), get_lidar(4,7), get_lidar(5,7), get_lidar(6,7), get_lidar(7,7));
+    // uart_printf("\x1b[2K\rDepth Map (mm):\r\n");
+    // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,0), get_lidar(1,0), get_lidar(2,0), get_lidar(3,0), get_lidar(4,0), get_lidar(5,0), get_lidar(6,0), get_lidar(7,0));
+    // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,1), get_lidar(1,1), get_lidar(2,1), get_lidar(3,1), get_lidar(4,1), get_lidar(5,1), get_lidar(6,1), get_lidar(7,1));
+    // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,2), get_lidar(1,2), get_lidar(2,2), get_lidar(3,2), get_lidar(4,2), get_lidar(5,2), get_lidar(6,2), get_lidar(7,2));
+    // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,3), get_lidar(1,3), get_lidar(2,3), get_lidar(3,3), get_lidar(4,3), get_lidar(5,3), get_lidar(6,3), get_lidar(7,3));
+    // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,4), get_lidar(1,4), get_lidar(2,4), get_lidar(3,4), get_lidar(4,4), get_lidar(5,4), get_lidar(6,4), get_lidar(7,4));
+    // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,5), get_lidar(1,5), get_lidar(2,5), get_lidar(3,5), get_lidar(4,5), get_lidar(5,5), get_lidar(6,5), get_lidar(7,5));
+    // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,6), get_lidar(1,6), get_lidar(2,6), get_lidar(3,6), get_lidar(4,6), get_lidar(5,6), get_lidar(6,6), get_lidar(7,6));
+    // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,7), get_lidar(1,7), get_lidar(2,7), get_lidar(3,7), get_lidar(4,7), get_lidar(5,7), get_lidar(6,7), get_lidar(7,7));
 
-    uart_printstr("\x1b[9A");
+    // uart_printstr("\x1b[9A");
     delay(250);
 
   }
