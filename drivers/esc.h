@@ -3,7 +3,6 @@
 
 void esc_init();
 
-
-void esc_set_throttle(uint8_t percent);
+void esc_set_throttle(uint8_t channel, uint8_t percent);
 
 #endif // !ESC
