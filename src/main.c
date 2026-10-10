@@ -45,9 +45,9 @@ int main(void) {
   // float x_accel, y_accel, z_accel, roll, pitch, yaw;
   uart_printf("System Clock Speed: %d Hz\r\n", SystemCoreClock);
   delay(3000);
-  esc_set_throttle(1, 10);
-  esc_set_throttle(2, 30);
-  esc_set_throttle(3, 50);
+  // esc_set_throttle(1, 10);
+  // esc_set_throttle(2, 30);
+  // esc_set_throttle(3, 50);
 
   while (true) {
     GPIOA->ODR ^= (1u << 5);
@@ -73,10 +73,6 @@ int main(void) {
     // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,5), get_lidar(1,5), get_lidar(2,5), get_lidar(3,5), get_lidar(4,5), get_lidar(5,5), get_lidar(6,5), get_lidar(7,5));
     // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,6), get_lidar(1,6), get_lidar(2,6), get_lidar(3,6), get_lidar(4,6), get_lidar(5,6), get_lidar(6,6), get_lidar(7,6));
     // uart_printf("\x1b[2K\r%d %d %d %d %d %d %d %d\r\n", get_lidar(0,7), get_lidar(1,7), get_lidar(2,7), get_lidar(3,7), get_lidar(4,7), get_lidar(5,7), get_lidar(6,7), get_lidar(7,7));
-    delay(5000);
-    esc_set_throttle(1, 0);
-    esc_set_throttle(2, 0);
-    esc_set_throttle(3, 0);
 
     // uart_printstr("\x1b[9A");
 
