@@ -2,6 +2,11 @@
 #include "stm32f446xx.h"
 #include "uart.h"
 
+static uint8_t ch1_throttle;
+static uint8_t ch2_throttle;
+static uint8_t ch3_throttle;
+static uint8_t ch4_throttle;
+
 void esc_init() {
   // Enable TIM3 Peripheral Bus
   RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
@@ -98,18 +103,38 @@ void esc_set_throttle(uint8_t channel, uint8_t percent) {
   switch (channel) {
   case 1:
     TIM3->CCR1 = ccr_val;
+    ch1_throttle = percent;
     break;
   case 2:
     TIM3->CCR2 = ccr_val;
+    ch2_throttle = percent;
     break;
   case 3:
     TIM3->CCR3 = ccr_val;
+    ch3_throttle = percent;
     break;
   case 4:
     TIM3->CCR4 = ccr_val;
+    ch4_throttle = percent;
     break;
   default:
     uart_printf("Tried to set throttle for channel %d?\r\n", channel);
     return;
   }
+}
+
+uint8_t get_ch1_throttle() {
+  return ch1_throttle;
+}
+
+uint8_t get_ch2_throttle() {
+  return ch2_throttle;
+}
+
+uint8_t get_ch3_throttle() {
+  return ch3_throttle;
+}
+
+uint8_t get_ch4_throttle() {
+  return ch4_throttle;
 }

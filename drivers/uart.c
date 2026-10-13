@@ -14,6 +14,7 @@ void USART2_IRQHandler(void) {
   while (!(USART2->SR & USART_SR_RXNE)) {
   }
   uint8_t byte = USART2->DR;
+  uint8_t curr_throttle = get_ch1_throttle();
 
   switch (byte) {
   case 'k':
@@ -65,8 +66,32 @@ void USART2_IRQHandler(void) {
     esc_set_throttle(3, 90);
     esc_set_throttle(4, 90);
     break;
+  case 'w':
+    if (curr_throttle == 100) {
+      uart_printf("\r\nAlready at max throttle\r\n");
+      return;
+    }
+
+    uart_printf("\r\nIncreasing throttle to %d%%...\r\n", curr_throttle + 1);
+    esc_set_throttle(1, curr_throttle + 1);
+    esc_set_throttle(2, curr_throttle + 1);
+    esc_set_throttle(3, curr_throttle + 1);
+    esc_set_throttle(4, curr_throttle + 1);
+    break;
+  case 's':
+    if (curr_throttle == 0) {
+      uart_printf("\r\nAlready at min throttle\r\n");
+      return;
+    }
+
+    uart_printf("\r\nDecreasing throttle to %d%%...\r\n", curr_throttle - 1);
+    esc_set_throttle(1, curr_throttle - 1);
+    esc_set_throttle(2, curr_throttle - 1);
+    esc_set_throttle(3, curr_throttle - 1);
+    esc_set_throttle(4, curr_throttle - 1);
+    break;
   default:
-      uart_printf("\r\nUnknown command: %c\r\n", byte);
+    uart_printf("\r\nUnknown command: %c\r\n", byte);
   }
 }
 
